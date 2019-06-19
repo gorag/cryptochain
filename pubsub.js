@@ -14,9 +14,7 @@ class PubSub {
 
     this.subscribeToChannels();
 
-    this.subscriber.on('message', (channel, message) =>
-      this.handleMessage(channel, message)
-    );
+    this.subscriber.on('message', (channel, message) => this.handleMessage(channel, message));
   }
 
   handleMessage(channel, message) {
@@ -36,7 +34,11 @@ class PubSub {
   }
 
   publish({ channel, message }) {
-    this.publisher.publish(channel, message);
+    this.subscriber.unsubscribe(channel, () => {
+      this.publisher.publish(channel, message, () => {
+        this.subscriber.subscribe(channel);
+      });
+    });
   }
 
   broadcastChain() {
